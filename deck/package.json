@@ -1,0 +1,25 @@
+{
+  "name": "@3sln/stack-docs",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "deck-build"
+  },
+  "dependencies": {
+    "@3sln/deck": "0.0.14"
+  },
+  "devDependencies": {
+    "vite": "^5.4.20"
+  },
+  "@3sln/deck": {
+    "title": "3sln Stack",
+    "pinned": [
+      "/introduction.md",
+      "/architecture.md",
+      "/coding-conventions.md",
+      "/project-structure.md"
+    ]
+  }
+}
