@@ -107,15 +107,15 @@ import { alias, div } from '@3sln/dodo';
 import { AddTodoAction } from '../../bl/todos.js';
 
 // Injects ENGINE and COMPONENTS
-export default ({ engine, SaveButton, TextInput }) => {
+export default ({ engine, saveButton, textInput }) => {
   
   return alias(() => {
     let currentText = '';
 
     return div(
-      TextInput().on({ input: (e) => currentText = e.target.value }),
+      textInput().on({ input: (e) => currentText = e.target.value }),
       
-      SaveButton('Add Item').on({ 
+      saveButton('Add Item').on({ 
         // Catch the custom DOM event from the pure component
         'save-requested': () => {
              if(currentText) engine.dispatch(new AddTodoAction(currentText));
@@ -165,11 +165,11 @@ This is the standard pattern for integrating `dodo` with Web Components.
 
 ```javascript
 import { reconcile } from '@3sln/dodo';
-import MyChartComponent from './ui/components/chart.js'; // A special() component
+import myChartComponent from './ui/components/chart.js'; // A special() component
 
 class MyChartElement extends HTMLElement {
   connectedCallback() {
-    this.chart = MyChartComponent(); // Create the VDOM factory
+    this.chart = myChartComponent(); // Create the VDOM factory
     this.render();
   }
 
@@ -191,6 +191,7 @@ customElements.define('my-chart', MyChartElement);
 
 ## 🚫 Anti-Patterns (What to Avoid)
 
+*   ❌ **PascalCase Components**: **NEVER** use `UpperCamelCase` for component names. We are not in React. Always use `lowerCamelCase` (e.g., `saveButton`, not `SaveButton`).
 *   ❌ **Engine in Components**: Do not pass `engine` to `src/ui/components`. Only Compositions know about the engine.
 *   ❌ **Provider Confusion**: Injected Provider dependencies are **Providers**, not resources. You must `.obtain()` them.
 *   ❌ **No Action Chaining**: Actions cannot call other Actions. Use `engineFeed`.
