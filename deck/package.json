@@ -15,6 +15,7 @@
   },
   "@3sln/deck": {
     "title": "3sln Stack",
+    "url": "https://stack.3sln.com",
     "pinned": [
       "/introduction.md",
       "/architecture.md",
