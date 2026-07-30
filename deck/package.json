@@ -16,11 +16,21 @@
   "@3sln/deck": {
     "title": "3sln Stack",
     "url": "https://stack.3sln.com",
+    "description": "How we build: the ngin/dodo provider graph, the boundaries that hold in every application, and the shapes those applications take.",
     "pinned": [
       "/introduction.md",
-      "/architecture.md",
-      "/coding-conventions.md",
-      "/project-structure.md"
+      "/ethos.md",
+      "/core/boundaries.md",
+      "/core/providers.md",
+      "/core/actions-and-queries.md",
+      "/core/feeds.md",
+      "/core/testing.md",
+      "/shapes/overview.md",
+      "/shapes/spa.md",
+      "/shapes/service.md",
+      "/shapes/headless.md",
+      "/conventions.md",
+      "/structure.md"
     ]
   }
 }
