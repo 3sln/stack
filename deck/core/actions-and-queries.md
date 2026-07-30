@@ -130,10 +130,22 @@ squarely back in query territory.
 
 ## Interceptors
 
-Cross-cutting concerns around a dispatch — logging, transactions, auth,
-retries — with `enter`, `leave` and `error`, unwound in reverse. An interceptor
-that calls `handled()` clears the error, and outer interceptors see a success.
+Cross-cutting concerns around work — logging, transactions, auth, retries — with
+`enter`, `leave` and `error`, unwound in reverse. An interceptor that calls
+`handled()` clears the error, and outer interceptors see a success.
 
-The constraint worth knowing: **interceptors run on the dispatcher only.**
-Queries never pass through one. If a rule must hold for reads as well as writes,
-it belongs in a provider, not an interceptor.
+**Interceptors wrap queries too**, as of ngin 0.0.5. They were an actions-only
+idea, but the concerns people reach for them with are not about actions — they
+are about work, and a query is work. The context says which kind it was called
+for, `action` or `query`, so one interceptor can serve both and tell them apart.
+
+Where a query is entered matters:
+
+- A **live** query is entered before it boots — before its boot action is
+  dispatched and before its resources are leased — and left once it has been
+  killed and its lease released.
+- A query answered by `fetch` (a one-shot subscribe, or peeking at an inactive
+  one) has the same shape as a dispatch: enter, fetch, leave.
+
+Interceptors have no say in results. What reaches subscribers, and what `peek()`
+resolves with, is the query's own value whatever the hooks return.

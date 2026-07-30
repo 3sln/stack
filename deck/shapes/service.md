@@ -71,17 +71,24 @@ Write that once and share it across **every** request surface. An HTTP router
 needs it; so does an MCP endpoint, because an agent holding Alice's token is
 Alice, and there must be no second, MCP-shaped way around the ACL.
 
-## Authorization is a provider
+## Authorization is not a step
 
-The most valuable thing this shape gets from ngin. Rather than *stat the node,
-look up its collection, assert the capability, then operate* — four steps at
-twenty-six call sites — the grant is the object you operate through, obtained by
-the container before `execute` runs.
+The point that is settled: *stat the node, look up its collection, assert the
+capability, then operate* — four steps remembered in order at twenty-six call
+sites — is the wrong shape. The check and the use are separate, so nothing
+carries the grant forward, and the destructive call stays one line away.
+
+What replaces it is under active discussion. One answer is a **provider**, where
+the grant is the object you operate through: `obtain` resolves and asserts, and
+the handle you get back has only the methods that capability permits, so a route
+never holds a raw id. The other is an **interceptor**, which since ngin 0.0.5
+covers queries as well as actions and enters before a live query boots or leases
+anything.
 
 Read [Ethos §3](/?c=%2Fethos.md) and
-[Providers → Providers as policy](/?c=%2Fcore%2Fproviders.md). The short version:
-a `read` handle has no `remove`, and a route never holds a raw id it could take
-somewhere else.
+[Providers → Provider or interceptor?](/?c=%2Fcore%2Fproviders.md) before
+picking one for new work. The example below uses the provider form because that
+is what this codebase currently does, not because the question is closed.
 
 ## Routes are the surface
 

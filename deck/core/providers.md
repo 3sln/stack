@@ -115,13 +115,35 @@ rule that should stop work from happening at all:
 node: NodeAccessProvider
 ```
 
-Two properties follow, and neither is available from an interceptor:
-
-- It works identically for actions **and queries** — ngin runs interceptors on
-  the dispatcher only, so a query would escape one entirely.
-- The action never sees a raw id it could take somewhere else.
+The property that follows, and that nothing else gives you: **the grant is the
+object.** The action never sees a raw id it could take somewhere else, and the
+handle's method surface is already narrowed to what the capability permits — a
+`read` handle has no `remove`.
 
 See [Ethos §3](/?c=%2Fethos.md).
+
+### Provider or interceptor? — open
+
+This deck used to argue the point was settled, on the grounds that interceptors
+ran on the dispatcher only and a query would escape one entirely. **That is no
+longer true**: as of ngin 0.0.5 interceptors wrap queries as well, and a live
+query is entered *before* it boots and *before* its resources are leased — which
+is earlier than a provider can refuse.
+
+So for capabilities, identity and auth, both shapes are now viable and the
+trade-off is genuinely unsettled:
+
+| | Provider | Interceptor |
+| --- | --- | --- |
+| Refuses at | `lease()` | before boot, before the lease |
+| Granularity | per dependency, declared in `deps` | one registration covers everything |
+| Shapes what you hold | yes — the handle's methods *are* the permitted ones | no — it is a gate around the work |
+| Visible in the consumer | yes, in `static deps` | no |
+
+The narrowing in row three is the thing an interceptor cannot reproduce, and it
+is why the pattern is documented here. Whether that is worth declaring an access
+dependency at every call site, versus one interceptor that cannot be forgotten,
+is not decided. Do not treat either as house style yet.
 
 ## What the container derives so you don't
 

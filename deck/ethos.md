@@ -58,6 +58,13 @@ This generalises past authorization. Any rule you would otherwise have to
 remember is better expressed as an object whose surface only permits the legal
 moves.
 
+What this principle does *not* settle is the mechanism for capabilities,
+identity and auth specifically. An interceptor can also refuse work before it
+starts — see
+[Providers → Provider or interceptor?](/?c=%2Fcore%2Fproviders.md). What it
+cannot do is narrow what you then hold, which is the part of this principle
+worth keeping either way.
+
 ## 4. One model of a rule, in one place.
 
 Two implementations of the same rule agree while everything is wired correctly
