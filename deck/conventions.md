@@ -59,6 +59,7 @@ Named because each has actually happened.
 | `onClick`-style callback props | use `.on({ click })`, and [bubble events upward](/?c=%2Fcore%2Fboundaries.md) |
 | Callbacks or acks passed down for upward signalling | native browser events already do this, across arbitrary depth, with nothing threaded |
 | A `ui` handle that can dispatch | gives every component the engine it is not supposed to have — and is always a symptom of the row below |
+| A per-render handle argument threaded to every component | inject UI capabilities into the **factory**, once, at composition; a channel accumulates |
 | A `platform/` or `services/` folder beside `bl/` | state with a registry, a lifetime or an `observe()` belongs in the engine ([Ethos §7](/?c=%2Fethos.md)) |
 | A hand-rolled `subject`/`observe`/`set` | that is a Query, without the teardown |
 | A manual `rerender()` | state that never entered the reactive graph |

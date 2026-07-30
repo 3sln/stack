@@ -111,7 +111,61 @@ export const progressBar = fraction =>
     div({ className: 'progress-fill', $styling: { width: `${pct(fraction)}%` } }));
 ```
 
-### Two deviations, both debt
+## What a component may be given
+
+"Components get nothing but data" is too strong. A component genuinely needs
+things that are not data and not business logic: the dodo API itself, a theme,
+sub-components, a formatter. The engine is the wrong vehicle for these — a
+Provider handing out `dodo` is a category error, and it would put the render API
+behind an async `obtain`.
+
+Two mechanisms, both correct.
+
+**Module import of one shared instance.** The default, and what every app here
+does for dodo: a single `runtime.js` or `shared/stack.js` exports the configured
+instance, and components import it.
+
+```javascript
+import { dd } from '../../runtime.js';
+const { div, span, button } = dd;
+```
+
+This is not coupling to the app; it is coupling to the stack. It is also what
+guarantees every vnode reconciles through one dodo instance.
+
+**Factory injection at the composition root.** For anything an app might need
+more than one of — a theme, a swappable sub-component, a registry of openers a
+particular build ships.
+
+```javascript
+export default ({ theme, rowMenu }) => alias(function (item) { /* … */ });
+```
+
+The dependency is fixed once, where the app is assembled, and is visible in one
+place.
+
+The line is **what** is injected, not whether injection happens: it must be a UI
+capability. The moment the injected object can reach the engine, a business
+service, or a registry of application behaviour, it is not a UI capability — it
+is the engine with extra steps.
+
+The test that settles it: **could this component render in a component test with
+no engine?** A theme and a dodo instance keep that true. A handle with `go` and
+`platform` on it does not.
+
+### Timing matters as much as content
+
+Factory injection happens **once**, at composition. Passing a handle as a
+per-render argument to every component means every call site must already hold
+it, so it has to be threaded to every level of the tree — and an object that must
+reach everywhere inevitably accumulates everything, because adding a field to it
+is free and adding a parameter is not.
+
+That is the difference between `({ theme }) => alias(…)` and
+`function launcher(state, ui)`. The first names its dependency and fixes it; the
+second is a channel, and a channel with `engine` on it is not a UI capability.
+
+## Two deviations, both debt
 
 Neither of these is a sanctioned alternative. Both exist in our projects and
 both should be migrated toward events.
@@ -129,9 +183,19 @@ respected, it has been evacuated.
 `exec(commandId)`, `rerender()` and direct references to `engine`, `app` and
 `platform`, passed to every component as `component(state, ui)`.
 
-It is tempting to defend this as a pragmatic answer to prop-threading in a deep
-tree. It is not. **The handle is a symptom; the disease is a second architecture
-sitting above the engine.**
+Note precisely what makes this the wrong side of the line above, because it is
+two separate failures and only one of them is about injection:
+
+- **It is passed per render, not at composition.** The signature is
+  `export default function activityBar(state, ui)`, re-supplied on every call.
+  Had it been `({ theme, icons }) => alias(…)`, fixed once at the root, the
+  threading argument would hold and the object would have stayed small.
+- **What it carries is not a UI capability.** `engine`, `app` and `platform` are
+  on it. No amount of getting the timing right would fix that.
+
+And it is tempting to defend the whole thing as a pragmatic answer to
+prop-threading in a deep tree. It is not. **The handle is a symptom; the disease
+is a second architecture sitting above the engine.**
 
 Look at what it reaches. In the app where this pattern grew, `platform/` is
 roughly five thousand lines of services: a command registry with an `execute`,
