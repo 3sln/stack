@@ -117,6 +117,11 @@ Use `alias` rather than a plain function for anything reusable: it is memoized
 `<udom-alias>` element, which is what makes `.key()`, `.on()` and
 `this.dispatchEvent` possible at all.
 
+An alias builder is invoked as `builder.apply(hostElement, args)`, so write it
+as a `function` whenever it needs `this`. An arrow function's `this` is fixed
+where it is written and `apply` cannot change it — but arrows *inside* the
+builder are fine, and are the normal way to write handlers.
+
 For performance-critical rendering or a third-party library that owns its own
 DOM (charts, maps, editors), drop to `special({ attach, update, detach })`. Both
 `alias` and `special` nodes can be reconciled directly onto a custom element,

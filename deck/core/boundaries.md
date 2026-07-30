@@ -72,15 +72,16 @@ know, and the right choice depends on how reusable the component is meant to be.
 announces what happened; whoever is listening decides what it means.
 
 ```javascript
+// Must be a `function`: dodo invokes an alias builder as
+// `builder.apply(hostElement, args)`, and an arrow function's `this` is
+// fixed at definition, so apply cannot set it. (Arrows *nested inside*
+// are fine — they inherit the `this` apply just bound.)
 export default alias(function (state) {
-  // `alias` gives the component a stable host element — grab `this` here,
-  // not inside an arrow function, where it would not be bound.
-  const self = this;
   const fire = (type, detail) =>
-    self.dispatchEvent(new CustomEvent(type, { bubbles: true, detail }));
+    this.dispatchEvent(new CustomEvent(type, { bubbles: true, detail }));
 
   return div({ className: 'controls' },
-    button('Send').on({ click: () => fire('send-text', self._input.value) }));
+    button('Send').on({ click: () => fire('send-text', this._input.value) }));
 });
 ```
 
