@@ -125,8 +125,18 @@ into its compositions, the components folder ends up holding only decoration
 while the compositions grow to a thousand lines — the boundary has not been
 respected, it has been evacuated.
 
-**A context handle that dispatches.** A `ui` object carrying `go(action)` passed
-through the tree removes the threading problem by giving every component the
-engine, which is the thing components are specifically not supposed to have.
-Once it is available, *dispatch actions but never mutate state* is a convention
-rather than a structural guarantee — and the state duly acquires three owners.
+**A context handle that dispatches.** A `ui` object carrying `go(action)` —
+alongside `engine`, `platform` and a `rerender()` escape hatch — passed to every
+component as `component(state, ui)`. It removes the threading problem, and in a
+shell with deep trees and plugin-contributed components that problem is real:
+otherwise every intermediate signature changes whenever a leaf gains something
+new to say.
+
+The cost is that *dispatch actions, never mutate state* becomes a convention
+rather than a structural guarantee, because the engine and every service are
+right there on the handle. In practice the convention slipped — search state
+ended up with three owners, one of them a component writing a service's `set()`
+directly and forcing a manual `rerender()` — and it took an architecture audit
+to notice. It has since been pulled back behind actions. That is the argument in
+miniature: the boundary held only as long as someone was watching it, which is
+exactly what a boundary is supposed to make unnecessary.
