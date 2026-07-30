@@ -125,18 +125,50 @@ into its compositions, the components folder ends up holding only decoration
 while the compositions grow to a thousand lines — the boundary has not been
 respected, it has been evacuated.
 
-**A context handle that dispatches.** A `ui` object carrying `go(action)` —
-alongside `engine`, `platform` and a `rerender()` escape hatch — passed to every
-component as `component(state, ui)`. It removes the threading problem, and in a
-shell with deep trees and plugin-contributed components that problem is real:
-otherwise every intermediate signature changes whenever a leaf gains something
-new to say.
+**A context handle that dispatches.** A `ui` object carrying `go(action)`,
+`exec(commandId)`, `rerender()` and direct references to `engine`, `app` and
+`platform`, passed to every component as `component(state, ui)`.
 
-The cost is that *dispatch actions, never mutate state* becomes a convention
-rather than a structural guarantee, because the engine and every service are
-right there on the handle. In practice the convention slipped — search state
-ended up with three owners, one of them a component writing a service's `set()`
-directly and forcing a manual `rerender()` — and it took an architecture audit
-to notice. It has since been pulled back behind actions. That is the argument in
-miniature: the boundary held only as long as someone was watching it, which is
-exactly what a boundary is supposed to make unnecessary.
+It is tempting to defend this as a pragmatic answer to prop-threading in a deep
+tree. It is not. **The handle is a symptom; the disease is a second architecture
+sitting above the engine.**
+
+Look at what it reaches. In the app where this pattern grew, `platform/` is
+roughly five thousand lines of services: a command registry with an `execute`,
+a plugin host owning iframes and message ports, a contribution registry,
+keybindings, settings, context keys, navigation, overlays. Eleven of them
+hand-roll their own `observe()`, and the same `subject`/`observe`/`set` plumbing
+is copy-pasted nine times.
+
+Every one of those is something ngin already has a name for:
+
+| Built in `platform/` | Should be |
+| --- | --- |
+| `CommandService` — a `handlers` Map plus `execute(id, …)` | a registry **Provider**, plus an `ExecuteCommand` **Action** |
+| `PluginHost` — iframes, ports, install/uninstall/reconcile | a **Provider** (`obtain`/`release`/`dispose`) plus Actions |
+| contribution / keybinding registries | **Providers** |
+| settings, context keys, navigation, overlay state | **Queries**, with Actions to change them |
+| nine copies of `subject` + `observe` + `set` | a Query. That is what a Query is. |
+
+Once the command registry lives outside the engine, `engine.dispatch` cannot
+reach it — so something has to carry `platform` down to the components, and that
+something is the handle. The threading problem it solves was created by moving
+this logic out of the engine in the first place.
+
+Move it back and the handle has nothing left to carry. `ui.exec(id)` becomes
+`engine.dispatch(new ExecuteCommand(id))` in a composition. `ui.go` was only ever
+`engine.dispatch` with a shorter name. `ui.rerender()` — the manual repaint for
+state that never entered a reactive graph — stops being expressible, which is the
+point. Components go back to `(state)` plus bubbling events.
+
+The failure this predicts is not hypothetical. Search state ended up with three
+owners, one of them a component writing a service's `set()` directly and forcing
+a manual `rerender()`. It took an architecture audit to catch, and it has since
+been pulled back behind actions — by convention, not by construction, so nothing
+stops it recurring.
+
+The rule worth extracting: **anything with a registry, a lifetime, or an
+`observe()` belongs in the engine.** Pure helpers — an expression parser, a
+formatter, a URL builder — can live wherever they are used. Everything else is a
+Provider, an Action or a Query, and if it is none of those it should not be
+holding state that the UI reads.

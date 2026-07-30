@@ -21,6 +21,14 @@ Wherever they appear, they mean the same thing:
 `ui/components` never imports `bl/`. `bl/` never imports `ui/`. Everything else
 is arrangement.
 
+One folder that should **not** appear: a `platform/` or `services/` directory of
+stateful objects sitting beside `bl/` and consumed directly by the UI. Whatever
+is in it — command dispatch, a plugin host, registries, settings — is provider,
+action and query material that has drifted out of the engine, and the drift is
+what forces a context handle into every component
+([Boundaries](/?c=%2Fcore%2Fboundaries.md)). Genuinely stateless helpers do not
+need a home of their own; put them in `lib/`.
+
 ## A single-app client
 
 The classic layout, and the right default when the repository is one app:

@@ -45,6 +45,17 @@ Use `fromLazySingleton` wherever construction can fail — opening IndexedDB in
 private mode, requesting a microphone, a blocked upgrade — so the failure
 reaches whoever asked rather than becoming an unhandled rejection at import time.
 
+**Providers are not only hardware.** The same applies to anything in the app
+holding a registry or a lifetime: a command registry, a contribution or
+extension registry, keybindings, a settings store, a plugin host owning iframes
+and message ports. Those are Providers, their mutations are Actions, and their
+observable state is Queries.
+
+The moment they live outside the engine, `engine.dispatch` cannot reach them, and
+the app grows a handle threaded through the component tree to compensate. That
+handle is how a UI layer ends up holding the engine. See
+[Ethos §7](/?c=%2Fethos.md).
+
 ## Reactivity: the Cell seam
 
 dodo's reactivity speaks the **Cell** protocol — `{ onDirty(fn), getValue() }` —

@@ -90,21 +90,45 @@ This is what makes a codebase runnable in more than one place — Node, Bun,
 Workers, a test harness — and it is not a refactor you can do later, because by
 then the platform is in four hundred files.
 
-## 7. Seams are events, not return values.
+## 7. Do not rebuild the engine above the engine.
+
+The most expensive mistake in this stack is not skipping ngin. It is using ngin
+for some of the application and then growing a second, parallel system for the
+rest — a folder of services with their own registries, their own lifecycles, and
+their own hand-rolled `observe()`.
+
+It never arrives as a decision. It arrives as one service that seemed too
+UI-shaped to be a provider, then a registry beside it, then a copy of the
+subscribe/notify plumbing, nine times.
+
+The tell is a reactivity helper you wrote yourself, and a manual `rerender()`
+next to it. A Query already does that, correctly, with teardown.
+
+Ask of anything holding state: **does it have a registry, a lifetime, or an
+`observe()`?** Then it is a Provider, an Action or a Query, wherever it happens
+to sit today. Pure helpers — a parser, a formatter, a URL builder — are exempt,
+because they hold nothing.
+
+The cost of getting this wrong is not the duplication. It is that everything in
+the second system is unreachable from `engine.dispatch`, so you must hand every
+component a way to reach it — and the boundary you were maintaining is gone, not
+because anyone argued against it, but because it became impossible to keep.
+
+## 8. Seams are events, not return values.
 
 Work that has something to say *now* and something else to say *later* has a
 feed, not a return value. The alternative is inventing a `{ task, alreadyRunning,
 done }` tuple, and then a second polling mechanism bolted on beside it, and then
 discovering both were describing the same thing badly.
 
-## 8. The edge is dumb.
+## 9. The edge is dumb.
 
 A UI component, an HTTP route, and a line of CLI output are the same role: they
 render what they are given and signal intent. None of them decides anything. The
 value of this rule is entirely in how boring it makes the outermost layer, which
 is the layer that changes most often.
 
-## 9. A migration you cannot verify should not be started.
+## 10. A migration you cannot verify should not be started.
 
 > 409 tests passed before the rewrite and 409 passed after, which is the only
 > useful definition of "this changed no behaviour".
@@ -112,7 +136,7 @@ is the layer that changes most often.
 Keep the old entry point as a facade so the existing tests drive the new code
 unchanged. If you cannot arrange that, the refactor is not ready to begin.
 
-## 10. Be honest about what a change cost.
+## 11. Be honest about what a change cost.
 
 Every one of these choices has a price, and the price belongs in the comment
 next to the code:

@@ -46,7 +46,7 @@ cost. A comment that restates the code is noise; a comment that records the bug
 this shape prevents is the most valuable thing in the file.
 
 Where a decision has a price, the price goes in the comment next to it. See
-[Ethos §10](/?c=%2Fethos.md).
+[Ethos §11](/?c=%2Fethos.md).
 
 ## Anti-patterns
 
@@ -58,7 +58,11 @@ Named because each has actually happened.
 | `engine` in a component | the boundary is the whole design |
 | `onClick`-style callback props | use `.on({ click })`, and [bubble events upward](/?c=%2Fcore%2Fboundaries.md) |
 | Callbacks or acks passed down for upward signalling | native browser events already do this, across arbitrary depth, with nothing threaded |
-| A `ui` handle that can dispatch | gives every component the engine it is not supposed to have |
+| A `ui` handle that can dispatch | gives every component the engine it is not supposed to have — and is always a symptom of the row below |
+| A `platform/` or `services/` folder beside `bl/` | state with a registry, a lifetime or an `observe()` belongs in the engine ([Ethos §7](/?c=%2Fethos.md)) |
+| A hand-rolled `subject`/`observe`/`set` | that is a Query, without the teardown |
+| A manual `rerender()` | state that never entered the reactive graph |
+| Command dispatch or plugin lifecycle in the UI layer | a registry Provider plus an Action; `engine.dispatch` must be able to reach them |
 | Treating an injected provider as the resource | providers get *providers*; consumers get *resources* |
 | Actions dispatching Actions | there is no engine in `deps` on purpose; use `engineFeed` |
 | `await engine.dispatch(...)` | returns a feed, not a promise — resolves immediately. Use `.next('complete')` |
