@@ -73,8 +73,11 @@ Named because each has actually happened.
 | A one-eighteen-key `ctx` object | a service locator wearing dependency injection's clothes |
 | Splitting `bl/` into `actions/` + `queries/` | they change together |
 | Named exports for UI factories | `export default`, one per file |
-| `.style({...})` on a vnode | there is no such helper; use `$styling` |
-| A bare hyphenated prop (`'aria-label'`) | bare props are assigned as properties; use `$attrs` |
+| A props object in a tag's argument list | `tag(...children)` takes children and nothing else; chain `.props({...})` ([SPA](/?c=%2Fshapes%2Fspa.md)) |
+| A `$`-prefixed directive (`$styling`, `$classes`, `$attrs`, `$dataset`) | gone with the props object; they are `.style()`, `.classes()`, `.attrs()`, `.data()` |
+| A bare hyphenated prop (`'aria-label'`) | `.props()` assigns as properties; use `.attrs()` |
+| A space inside one `.classes()` entry | each flattened entry is one class name and goes to `classList.add()`; a computed multi-name value belongs in `.props({ className })` |
+| An element setter on an `alias` node | they are element-only and throw; only `.key()` and `.on()` apply to any vnode |
 | `bl/` importing from `ui/` | wrong direction; the registration belongs in the composition root |
 | Reaching past a façade into its internals | the invariant has one home or it has none |
 | Dual-writing derived state | derive it from one projection; two writers means one is wrong |
