@@ -29,8 +29,11 @@ import { dodo, watch, cell } from '../shared/stack.js';   // ✅
 import * as dodo from '@3sln/dodo';                        // ❌ in app code
 ```
 
-- **Package specifiers are scoped**: `@3sln/ngin`, `@3sln/dodo`. Bare `ngin` is
-  wrong wherever it appears.
+- **Package specifiers are scoped**: `@3sln/ngin`, `@3sln/dodo`, `@3sln/bab`,
+  `@3sln/js-tools`. Bare `ngin` is wrong wherever it appears, and so is a deep
+  import past a package's `exports` — the build gives every exported subpath its
+  own entry point, and reaching past them hands out a second copy of the package
+  ([Delivery](/?c=%2Fdelivery.md)).
 
 ## Data
 
@@ -70,11 +73,19 @@ Named because each has actually happened.
 | A one-eighteen-key `ctx` object | a service locator wearing dependency injection's clothes |
 | Splitting `bl/` into `actions/` + `queries/` | they change together |
 | Named exports for UI factories | `export default`, one per file |
-| `.style({...})` on a vnode | there is no such helper; use `$styling` |
-| A bare hyphenated prop (`'aria-label'`) | bare props are assigned as properties; use `$attrs` |
+| A props object in a tag's argument list | `tag(...children)` takes children and nothing else; chain `.props({...})` ([SPA](/?c=%2Fshapes%2Fspa.md)) |
+| A `$`-prefixed directive (`$styling`, `$classes`, `$attrs`, `$dataset`) | gone with the props object; they are `.style()`, `.classes()`, `.attrs()`, `.data()` |
+| A bare hyphenated prop (`'aria-label'`) | `.props()` assigns as properties; use `.attrs()` |
+| A space inside one `.classes()` entry | each flattened entry is one class name and goes to `classList.add()`; a computed multi-name value belongs in `.props({ className })` |
+| An element setter on an `alias` node | they are element-only and throw; only `.key()` and `.on()` apply to any vnode |
 | `bl/` importing from `ui/` | wrong direction; the registration belongs in the composition root |
 | Reaching past a façade into its internals | the invariant has one home or it has none |
 | Dual-writing derived state | derive it from one projection; two writers means one is wrong |
 | Inferring config from whether a service is present | decide from configuration ([Ethos §5](/?c=%2Fethos.md)) |
 | Swallowing a mirror write with `.catch(() => {})` | two stores diverge invisibly |
 | `npm` / `npx` in a Bun project | `bun` / `bunx`; a `packageManager` pin guards it |
+| `?v=` on an asset URL | a cache key nothing downstream can reason about; the filename carries the hash ([Delivery](/?c=%2Fdelivery.md)) |
+| `immutable` on a stable-named file | the browser stops re-checking it and keeps importing a build that no longer exists |
+| Two `Cache-Control` rules matching one path | Cloudflare appends and the strictest wins, so `no-cache` quietly beats the caching you wanted |
+| A hand-maintained import map in the repository | it is build output; a checked-in one drifts the moment a dependency moves |
+| A deep import into a dependency's internals | a second copy of the package, and the singleton it was is not one any more |

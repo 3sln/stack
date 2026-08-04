@@ -80,8 +80,9 @@ export default alias(function (state) {
   const fire = (type, detail) =>
     this.dispatchEvent(new CustomEvent(type, { bubbles: true, detail }));
 
-  return div({ className: 'controls' },
-    button('Send').on({ click: () => fire('send-text', this._input.value) }));
+  return div(
+    button('Send').on({ click: () => fire('send-text', this._input.value) }),
+  ).classes('controls');
 });
 ```
 
@@ -89,10 +90,11 @@ The composition listens and translates:
 
 ```javascript
 export default ({ engine, controlBar }) => alias(state =>
-  div({ className: 'app' },
+  div(
     controlBar(state).on({
       'send-text': e => engine.dispatch(new SendText(e.detail)),
-    })));
+    }),
+  ).classes('app'));
 ```
 
 We use the platform's own upward channel because it already exists and already
@@ -107,8 +109,9 @@ rule so much as the case where the rule has nothing to do:
 
 ```javascript
 export const progressBar = fraction =>
-  div({ className: 'progress' },
-    div({ className: 'progress-fill', $styling: { width: `${pct(fraction)}%` } }));
+  div(
+    div().classes('progress-fill').style({ width: `${pct(fraction)}%` }),
+  ).classes('progress');
 ```
 
 ## What a component may be given

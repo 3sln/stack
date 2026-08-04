@@ -94,11 +94,12 @@ export default ({ engine, controlBar, trackList }) => {
   const state = queryCell(engine.query(new PlayerState()));
 
   return alias(() =>
-    div({ className: 'player' },
+    div(
       watch(state, s => trackList(s.tracks)),
       controlBar().on({
         'send-text': e => engine.dispatch(new SendText(e.detail)),
-      })));
+      }),
+    ).classes('player'));
 };
 ```
 
@@ -111,22 +112,53 @@ Dumb. No engine, no business logic, no imports from `bl/`. They render what they
 are handed and announce what happened with
 [bubbling DOM events](/?c=%2Fcore%2Fboundaries.md).
 
-Build them with `tag(props, ...children)`; props use `$styling`, `$classes`,
-`$attrs` and `$dataset`; chain `.on({ event: fn })`, `.key(k)` and `.opaque()`.
+**Everything is chained.** `tag(...children)` takes children and nothing else;
+configuration hangs off the vnode. `.props({...})` for DOM properties,
+`.classes(...)`, `.style({...})`, `.attrs({...})` and `.data({...})` for the
+four facets, plus `.on({ event: fn })`, `.key(k)` and `.opaque()`.
 
 ```javascript
-// Hyphenated names must go through $attrs: a bare prop is assigned as a
-// property, and `aria-label` is not one.
-button({ className: 'play', $attrs: { 'aria-label': 'Play' } }, icons.play())
+// Hyphenated names go through .attrs(): .props() assigns as a property, and
+// `aria-label` is not one.
+button(icons.play())
+  .classes('play')
+  .attrs({ 'aria-label': 'Play' })
   .on({ click: () => fire('toggle-play') })
 ```
 
-There is no `.style()` helper. Use `$styling`.
+Props in the argument list were compared by identity as a member of `args`, so
+an object literal rebuilt each render — which is every object literal in a
+render function — always looked changed, and bought a wasted second pass over
+the element. Chained maps are compared as maps, so unchanged contents cost
+nothing. The asymmetry with `alias`, which still takes whatever arguments you
+give it, is the point rather than an oversight.
+
+`.classes()` is varargs and flattens nested arrays, dropping falsey entries, so
+a conditional needs no filtering:
+
+```javascript
+.classes('todo', completed && 'completed', editing && 'editing')
+```
+
+Each *flattened entry* is one class name, handed to `classList.add()`, so a
+single string may not contain spaces — `.classes('btn primary')` throws. A
+computed value that may expand to several names belongs in
+`.props({ className })`, which dodo still supports.
+
+A leftover props map is caught rather than rendered. dodo refuses a child
+object that has nothing better than `Object.prototype.toString` to say about
+itself, at any position and any depth, so a map that did not make it onto
+`.props()` fails loudly instead of putting `[object Object]` on the page.
 
 Use `alias` rather than a plain function for anything reusable: it is memoized
 (a plain function re-runs on every parent render), and it is backed by a stable
 `<udom-alias>` element, which is what makes `.key()`, `.on()` and
 `this.dispatchEvent` possible at all.
+
+The element setters are element-only and throw on an `alias` or `special`
+vnode — `.key()` and `.on()` are the two that apply to any vnode. An alias
+styles itself from the inside, or is handed a class by its caller as an
+argument.
 
 An alias builder is invoked as `builder.apply(hostElement, args)`, so write it
 as a `function` whenever it needs `this`. An arrow function's `this` is fixed

@@ -102,6 +102,17 @@ Note the two `shared/` folders and that they are different: one is shared
 between clients, one crosses the client/server boundary. Only the second may be
 imported by the worker.
 
+## Where the build config goes
+
+`jstools.config.js` at the repository root, beside `package.json` — it names
+which directories ship, so it belongs where a reader looks first, not buried in
+`scripts/`. The build script beside it stays small: it calls the builder and
+emits whatever else the deployment needs ([Delivery](/?c=%2Fdelivery.md)).
+
+The `include` list in it is a boundary, not a convenience. `src/worker` and
+`src/server` are not client code, and publishing them to the asset tree puts the
+whole domain layer on a public URL.
+
 ## Where the deck goes
 
 A `deck/` subdirectory with its own `package.json`, documenting the project it
