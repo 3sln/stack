@@ -16,7 +16,7 @@
   "@3sln/deck": {
     "title": "3sln Stack",
     "url": "https://stack.3sln.com",
-    "description": "How we build: the ngin/dodo provider graph, the boundaries that hold in every application, and the shapes those applications take.",
+    "description": "How we build: the ngin/dodo provider graph, the boundaries that hold in every application, the shapes those applications take, and how they reach a browser.",
     "pinned": [
       "/introduction.md",
       "/ethos.md",
@@ -29,6 +29,7 @@
       "/shapes/spa.md",
       "/shapes/service.md",
       "/shapes/headless.md",
+      "/delivery.md",
       "/conventions.md",
       "/structure.md"
     ]

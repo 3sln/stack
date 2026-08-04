@@ -29,8 +29,11 @@ import { dodo, watch, cell } from '../shared/stack.js';   // ✅
 import * as dodo from '@3sln/dodo';                        // ❌ in app code
 ```
 
-- **Package specifiers are scoped**: `@3sln/ngin`, `@3sln/dodo`. Bare `ngin` is
-  wrong wherever it appears.
+- **Package specifiers are scoped**: `@3sln/ngin`, `@3sln/dodo`, `@3sln/bab`,
+  `@3sln/js-tools`. Bare `ngin` is wrong wherever it appears, and so is a deep
+  import past a package's `exports` — the build gives every exported subpath its
+  own entry point, and reaching past them hands out a second copy of the package
+  ([Delivery](/?c=%2Fdelivery.md)).
 
 ## Data
 
@@ -78,3 +81,8 @@ Named because each has actually happened.
 | Inferring config from whether a service is present | decide from configuration ([Ethos §5](/?c=%2Fethos.md)) |
 | Swallowing a mirror write with `.catch(() => {})` | two stores diverge invisibly |
 | `npm` / `npx` in a Bun project | `bun` / `bunx`; a `packageManager` pin guards it |
+| `?v=` on an asset URL | a cache key nothing downstream can reason about; the filename carries the hash ([Delivery](/?c=%2Fdelivery.md)) |
+| `immutable` on a stable-named file | the browser stops re-checking it and keeps importing a build that no longer exists |
+| Two `Cache-Control` rules matching one path | Cloudflare appends and the strictest wins, so `no-cache` quietly beats the caching you wanted |
+| A hand-maintained import map in the repository | it is build output; a checked-in one drifts the moment a dependency moves |
+| A deep import into a dependency's internals | a second copy of the package, and the singleton it was is not one any more |

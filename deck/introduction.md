@@ -11,6 +11,11 @@ that stay legible as they grow.
 - **[dodo](https://dodo.3sln.com)** — a functional VDOM, with reactivity,
   context, observation, animation and scoped styling as optional modules the
   core neither imports nor knows about.
+- **[bab](https://github.com/3sln/bab)** — localization. The source text is the
+  key, a translation is a `String`, and lookup is a pluggable catalogue.
+- **[js-tools](https://github.com/3sln/js-tools)** — the builder and development
+  server the client applications share. Unbundled ES modules, content-addressed,
+  resolved by an import map.
 - **[deck](https://deck.3sln.com)** — the documentation and playground tool this
   deck is built with.
 
@@ -38,6 +43,9 @@ those ideas take.
   [the headless process](/?c=%2Fshapes%2Fheadless.md), and an
   [overview](/?c=%2Fshapes%2Foverview.md) of how to tell which one you are
   writing.
+- **[Delivery](/?c=%2Fdelivery.md)** — how a client application actually
+  reaches a browser: what is bundled, what is not, and the two outages that
+  decided it.
 - **[Conventions](/?c=%2Fconventions.md)** and
   **[Structure](/?c=%2Fstructure.md)** — naming, file layout, and the
   anti-patterns worth naming out loud.
